@@ -89,7 +89,7 @@ void loop() {
     }
   }
 
-  if (state_red == HIGH) {
+  if (state_red == HIGH) { //This code seems to have issues when going from green state to red state
     if ((val_rite == HIGH) && (old_val_rite == LOW)) { //detect if the right button was pressed while currently at the red LED
       state_red = LOW;                                  //if pressed, tells arduino to move to next LED to the right (blue LED)
       state_blue = HIGH;
