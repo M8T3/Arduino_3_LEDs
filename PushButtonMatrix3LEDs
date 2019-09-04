@@ -1,0 +1,185 @@
+const int LED_grn = 9; // pin for green LED
+const int LED_red = 10; // pin for red LED
+const int LED_blue = 11; // pin for blue LED
+
+const int BUTTON_LEFT = 6; // input pin where pushbutton to move current LED selected to the left is connected
+const int BUTTON_CNTR = 5; // input pin where pushbutton to select current LED to be on or off is connected
+const int BUTTON_RITE = 4; // input pin where pushbutton to move current LED selected to the right is connected
+
+//This turn on an LED solution was adapted from Getting Started with Arduino book
+int val_left = 0;                        // val will be used to store the state of the input pin
+int old_val_left = 0;                    // old_val stores the previous value of "val"
+int val_ctr = 0;                         // val will be used to store the state of the input pin
+int old_val_ctr = 0;                     // old_val stores the previous value of "val"
+int val_rite = 0;                        // val will be used to store the state of the input pin
+int old_val_rite = 0;                    // old_val stores the previous value of "val"
+int state_grn = 1;                       // indicates if selection is currently at green LED
+int state_blue = 0;                      // indicates if selection is currently at blue LED
+int state_red = 0;                       // indicates if selection is currently at red LED
+int LEDgrn = 0;                          // To indicate if green LED is currently ON (solid) or OFF (blinking or dark)
+int LEDblue = 0;                         // To indicate if blue LED is currently ON (solid) or OFF (blinking or dark)
+int LEDred = 0;                          // To indicate if red LED is currently ON (solid) or OFF (blinking or dark)
+
+//Blinking code adapted from BlinkWithoutDelay (https://www.arduino.cc/en/tutorial/BlinkWithoutDelay)
+int ledState_grn = LOW;             // ledState_grn used to set the green LED
+int ledState_blue = LOW;             // ledState_blue used to set the blue LED
+int ledState_red = LOW;             // ledState_red used to set the red LED
+
+// Generally, you should use "unsigned long" for variables that hold time
+// The value will quickly become too large for an int to store
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change:
+const long interval = 1000;           // interval at which to blink (milliseconds)
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(LED_grn, OUTPUT); // tell Arduino LED is an output
+  pinMode(LED_blue, OUTPUT); // tell Arduino LED is an output
+  pinMode(LED_red, OUTPUT); // tell Arduino LED is an output
+  //pinMode(cath, OUTPUT); // tell Arduino cathode pin is an output
+
+  pinMode(BUTTON_LEFT, INPUT); // left pushbutton is an input
+  pinMode(BUTTON_CNTR, INPUT); // center pushbutton is an input
+  pinMode(BUTTON_RITE, INPUT); // right pushbutton is an input
+
+  digitalWrite(LED_grn, LOW);  //Set all the LEDs low initially
+  digitalWrite(LED_blue, LOW);
+  digitalWrite(LED_red, LOW);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //This turn on an LED solution was adapted from Getting Started with Arduino book
+  val_left = digitalRead(BUTTON_LEFT); // read input value from left button
+  val_ctr = digitalRead(BUTTON_CNTR); // read input value from center button
+  val_rite = digitalRead(BUTTON_RITE); // read input value from right button
+
+  if (state_grn == HIGH) {
+    if ((val_rite == HIGH) && (old_val_rite == LOW)) { //detect if the right button was pressed while currently at the green LED
+      state_grn = LOW;                                  //if pressed, tells arduino to move to next LED to the right (red LED)
+      state_red = HIGH;
+      delay(100);
+    }
+    else if ((val_ctr == HIGH) && (old_val_ctr == LOW)) { //detect if the center button was pressed while currently at the green LED
+      LEDgrn = 1 - LEDgrn;                                 //turns on/selects the green LED (solid light) or deselects it/turns it off (blinking or no light)
+      delay(100);
+    }
+    else {                                                //code for when the LED is blinking
+      // check to see if it's time to blink the LED; that is, if the difference
+      // between the current time and last time you blinked the LED is bigger than
+      // the interval at which you want to blink the LED.
+      unsigned long currentMillis = millis();
+
+      if (currentMillis - previousMillis >= interval) {
+        // save the last time you blinked the LED
+        previousMillis = currentMillis;
+
+        // if the LED is off turn it on and vice-versa:
+        if (ledState_grn == LOW) {
+          ledState_grn = HIGH;
+        } else {
+          ledState_grn = LOW;
+        }
+
+        // set the LED with the ledState of the variable:
+        digitalWrite(LED_grn, ledState_grn);
+      }
+    }
+  }
+
+  if (state_red == HIGH) {
+    if ((val_rite == HIGH) && (old_val_rite == LOW)) { //detect if the right button was pressed while currently at the red LED
+      state_red = LOW;                                  //if pressed, tells arduino to move to next LED to the right (blue LED)
+      state_blue = HIGH;
+      delay(100);
+    }
+    else if ((val_left == HIGH) && (old_val_left == LOW)) { //detect if the left button was pressed while currently at the red LED
+      state_red = LOW;                                       //if pressed, tells arduino to move to next LED to the left (green LED)
+      state_grn = HIGH;
+      delay(100);
+    }
+    else if ((val_ctr == HIGH) && (old_val_ctr == LOW)) { //detect if the center button was pressed while currently at the red LED
+      LEDred = 1 - LEDred;                                 //turns on/selects the red LED (solid light) or deselects it/turns it off (blinking or no light)
+      delay(100);
+    }
+    else {
+      // check to see if it's time to blink the LED; that is, if the difference
+      // between the current time and last time you blinked the LED is bigger than
+      // the interval at which you want to blink the LED.
+      unsigned long currentMillis = millis();
+
+      if (currentMillis - previousMillis >= interval) {
+        // save the last time you blinked the LED
+        previousMillis = currentMillis;
+
+        // if the LED is off turn it on and vice-versa:
+        if (ledState_red == LOW) {
+          ledState_red = HIGH;
+        } else {
+          ledState_red = LOW;
+        }
+
+        // set the LED with the ledState of the variable:
+        digitalWrite(LED_red, ledState_red);
+      }
+    }
+  }
+
+  if (state_blue == HIGH) {                
+    if ((val_left == HIGH) && (old_val_left == LOW)) { //detect if the left button was pressed while currently at the blue LED
+      state_blue = LOW;                                //if pressed, tells arduino to move to next LED to the left (blue LED)
+      state_red = HIGH;
+      delay(100);
+    }
+    else if ((val_ctr == HIGH) && (old_val_ctr == LOW)) { //detect if the center button was pressed while currently at the blue LED
+      LEDblue = 1 - LEDblue;                              //turns on/selects the blue LED (solid light) or deselects it/turns it off (blinking or no light)    
+      delay(100);
+    }
+    else {
+      // check to see if it's time to blink the LED; that is, if the difference
+      // between the current time and last time you blinked the LED is bigger than
+      // the interval at which you want to blink the LED.
+      unsigned long currentMillis = millis();
+
+      if (currentMillis - previousMillis >= interval) {
+        // save the last time you blinked the LED
+        previousMillis = currentMillis;
+
+        // if the LED is off turn it on and vice-versa:
+        if (ledState_blue == LOW) {
+          ledState_blue = HIGH;
+        } else {
+          ledState_blue = LOW;
+        }
+
+        // set the LED with the ledState of the variable:
+        digitalWrite(LED_blue, ledState_blue);
+      }
+    }
+  }
+
+  old_val_left = val_left;      //updating the previous value for the left button with the current left button value
+  old_val_ctr = val_ctr;        //updating the previous value for the center button with the current center button value
+  old_val_rite = val_rite;      //updating the previous value for the right button with the current leftrightbutton value
+
+  if (LEDgrn == 1) {            //to turn on green LED (if in green LED state)
+    digitalWrite(LED_grn, HIGH);
+  } else {
+    digitalWrite(LED_grn, LOW);
+  }
+
+  if (LEDblue == 1) {          //to turn on blue LED (if in blue LED state)
+    digitalWrite(LED_blue, HIGH);
+  } else {
+    digitalWrite(LED_blue, LOW);
+  }
+
+  if (LEDred == 1) {          //to turn on green LED (if in green LED state)
+    digitalWrite(LED_red, HIGH);
+  } else {
+    digitalWrite(LED_red, LOW);
+  }
+
+}
